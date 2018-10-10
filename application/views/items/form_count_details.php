@@ -1,4 +1,4 @@
-<?php echo form_open('items/save_inventory/'.$item_info->item_id, array('id'=>'item_form', 'class'=>'form-horizontal')); ?>
+<?php echo form_open('items', array('id'=>'item_form', 'class'=>'form-horizontal')); ?>
 	<fieldset id="count_item_basic_info">
 		<div class="form-group form-group-sm">
 			<?php echo form_label($this->lang->line('items_item_number'), 'name', array('class'=>'control-label col-xs-3')); ?>
@@ -70,13 +70,13 @@
 <table id="items_count_details" class="table table-striped table-hover">
 	<thead>
 		<tr style="background-color: #999 !important;">
-			<th colspan="4">Inventory Data Tracking</th>
+			<th colspan="4"><?php echo $this->lang->line('items_inventory_data_tracking'); ?></th>
 		</tr>
 		<tr>
-			<th width="30%">Date</th>
-			<th width="20%">Employee</th>
-			<th width="20%">In/Out Qty</th>
-			<th width="30%">Remarks</th>
+			<th width="30%"><?php echo $this->lang->line('items_inventory_date'); ?></th>
+			<th width="20%"><?php echo $this->lang->line('items_inventory_employee'); ?></th>
+			<th width="20%"><?php echo $this->lang->line('items_inventory_in_out_quantity'); ?></th>
+			<th width="30%"><?php echo $this->lang->line('items_inventory_remarks'); ?></th>
 		</tr>
 	</thead>
 	<tbody id="inventory_result">
@@ -91,13 +91,13 @@
 		foreach($inventory_array as $row)
 		{
 			$employee = $this->Employee->get_info($row['trans_user']);
-			array_push($employee_name, $employee->first_name . ' ' . $employee->last_name);   
+			array_push($employee_name, $employee->first_name . ' ' . $employee->last_name);
 		}
 		?>
 	</tbody>
 </table>
 
-<script type='text/javascript'>
+<script type="text/javascript">
 $(document).ready(function()
 {
     display_stock(<?php echo json_encode(key($stock_locations)); ?>);
@@ -107,22 +107,22 @@ function display_stock(location_id)
 {
     var item_quantities = <?php echo json_encode($item_quantities); ?>;
     document.getElementById("quantity").value = parseFloat(item_quantities[location_id]).toFixed(<?php echo quantity_decimals(); ?>);
-    
+
     var inventory_data = <?php echo json_encode($inventory_array); ?>;
     var employee_data = <?php echo json_encode($employee_name); ?>;
-    
+
     var table = document.getElementById("inventory_result");
 
     // Remove old query from tbody
     var rowCount = table.rows.length;
     for (var index = rowCount; index > 0; index--)
     {
-        table.deleteRow(index-1);       
+        table.deleteRow(index-1);
     }
-				
+
     // Add new query to tbody
-    for (var index = 0; index < inventory_data.length; index++) 
-    {                
+    for (var index = 0; index < inventory_data.length; index++)
+    {
         var data = inventory_data[index];
         if(data['trans_location'] == location_id)
         {
@@ -131,17 +131,17 @@ function display_stock(location_id)
             var td = document.createElement('td');
             td.appendChild(document.createTextNode(data['trans_date']));
             tr.appendChild(td);
-            
+
             td = document.createElement('td');
             td.appendChild(document.createTextNode(employee_data[index]));
             tr.appendChild(td);
-            
+
             td = document.createElement('td');
             td.appendChild(document.createTextNode(parseFloat(data['trans_inventory']).toFixed(<?php echo quantity_decimals(); ?>)));
 			td.setAttribute("style", "text-align:center");
             tr.appendChild(td);
-            
-            td = document.createElement('td');            
+
+            td = document.createElement('td');
             td.appendChild(document.createTextNode(data['trans_comment']));
             tr.appendChild(td);
 

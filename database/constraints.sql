@@ -6,7 +6,8 @@
 -- Constraints for table `ospos_customers`
 --
 ALTER TABLE `ospos_customers`
-  ADD CONSTRAINT `ospos_customers_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `ospos_people` (`person_id`);
+  ADD CONSTRAINT `ospos_customers_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `ospos_people` (`person_id`),
+  ADD CONSTRAINT `ospos_customers_ibfk_2` FOREIGN KEY (`package_id`) REFERENCES `ospos_customers_packages` (`package_id`);
 
 --
 -- Constraints for table `ospos_employees`
@@ -74,7 +75,8 @@ ALTER TABLE `ospos_receivings_items`
 --
 ALTER TABLE `ospos_sales`
   ADD CONSTRAINT `ospos_sales_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `ospos_employees` (`person_id`),
-  ADD CONSTRAINT `ospos_sales_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `ospos_customers` (`person_id`);
+  ADD CONSTRAINT `ospos_sales_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `ospos_customers` (`person_id`),
+  ADD CONSTRAINT `ospos_sales_ibfk_3` FOREIGN KEY (`dinner_table_id`) REFERENCES `ospos_dinner_tables` (`dinner_table_id`);
 
 --
 -- Constraints for table `ospos_sales_items`
@@ -98,34 +100,6 @@ ALTER TABLE `ospos_sales_payments`
   ADD CONSTRAINT `ospos_sales_payments_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `ospos_sales` (`sale_id`);
 
 --
--- Constraints for table `ospos_sales_suspended`
---
-ALTER TABLE `ospos_sales_suspended`
-  ADD CONSTRAINT `ospos_sales_suspended_ibfk_1` FOREIGN KEY (`employee_id`) REFERENCES `ospos_employees` (`person_id`),
-  ADD CONSTRAINT `ospos_sales_suspended_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `ospos_customers` (`person_id`);
-
---
--- Constraints for table `ospos_sales_suspended_items`
---
-ALTER TABLE `ospos_sales_suspended_items`
-  ADD CONSTRAINT `ospos_sales_suspended_items_ibfk_1` FOREIGN KEY (`item_id`) REFERENCES `ospos_items` (`item_id`),
-  ADD CONSTRAINT `ospos_sales_suspended_items_ibfk_2` FOREIGN KEY (`sale_id`) REFERENCES `ospos_sales_suspended` (`sale_id`),
-  ADD CONSTRAINT `ospos_sales_suspended_items_ibfk_3` FOREIGN KEY (`item_location`) REFERENCES `ospos_stock_locations` (`location_id`);
-
---
--- Constraints for table `ospos_sales_suspended_items_taxes`
---
-ALTER TABLE `ospos_sales_suspended_items_taxes`
-  ADD CONSTRAINT `ospos_sales_suspended_items_taxes_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `ospos_sales_suspended_items` (`sale_id`),
-  ADD CONSTRAINT `ospos_sales_suspended_items_taxes_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `ospos_items` (`item_id`);
-
---
--- Constraints for table `ospos_sales_suspended_payments`
---
-ALTER TABLE `ospos_sales_suspended_payments`
-  ADD CONSTRAINT `ospos_sales_suspended_payments_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `ospos_sales_suspended` (`sale_id`);
-
---
 -- Constraints for table `ospos_item_quantities`
 --
 ALTER TABLE `ospos_item_quantities`
@@ -144,3 +118,16 @@ ALTER TABLE `ospos_suppliers`
 ALTER TABLE `ospos_giftcards`
   ADD CONSTRAINT `ospos_giftcards_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `ospos_people` (`person_id`);
 
+--
+-- Constraints for table `ospos_customers_points`
+--
+ALTER TABLE `ospos_customers_points`
+ ADD CONSTRAINT `ospos_customers_points_ibfk_1` FOREIGN KEY (`person_id`) REFERENCES `ospos_customers` (`person_id`),
+ ADD CONSTRAINT `ospos_customers_points_ibfk_2` FOREIGN KEY (`package_id`) REFERENCES `ospos_customers_packages` (`package_id`),
+ ADD CONSTRAINT `ospos_customers_points_ibfk_3` FOREIGN KEY (`sale_id`) REFERENCES `ospos_sales` (`sale_id`);
+
+--
+-- Constraints for table `ospos_sales_reward_points`
+--
+ALTER TABLE `ospos_sales_reward_points`
+ ADD CONSTRAINT `ospos_sales_reward_points_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `ospos_sales` (`sale_id`);

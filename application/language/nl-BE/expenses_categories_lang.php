@@ -1,0 +1,19 @@
+<?php
+$lang["category_name_required"] = "De naam van dit veld is verplicht";
+$lang["expenses_categories_add_item"] = "Voeg categorie toe";
+$lang["expenses_categories_cannot_be_deleted"] = "Kan de categorie niet verwijderen";
+$lang["expenses_categories_category_id"] = "Id";
+$lang["expenses_categories_confirm_delete"] = "Bent u zeker dat u de geselecteerde uitgave categorie wil verwijderen?";
+$lang["expenses_categories_description"] = "Categorie Omschrijving";
+$lang["expenses_categories_error_adding_updating"] = "Fout bij het toevoegen of updaten van een Categorie Onkosten";
+$lang["expenses_categories_info"] = "Categorie Onkostennota";
+$lang["expenses_categories_name"] = "Categorie Naam";
+$lang["expenses_categories_new"] = "Nieuwe Categorie";
+$lang["expenses_categories_no_expenses_categories_to_display"] = "Geen Categorie om weer te geven";
+$lang["expenses_categories_none_selected"] = "U hebt geen Onkosten Categorie geselecteerd";
+$lang["expenses_categories_one_or_multiple"] = "Categorie Onkost";
+$lang["expenses_categories_quantity"] = "Hoeveelheid";
+$lang["expenses_categories_successful_adding"] = "Categorie Onkosten toevoegen geslaagd";
+$lang["expenses_categories_successful_deleted"] = "Categorie Onkosten verwijderen is geslaagd";
+$lang["expenses_categories_successful_updating"] = "Categorie Onkosten bijwerken voltooid";
+$lang["expenses_categories_update"] = "Categorie Bijwerken";

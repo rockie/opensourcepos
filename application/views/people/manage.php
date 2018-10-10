@@ -12,12 +12,12 @@ $(document).ready(function()
 		uniqueId: 'people.person_id',
 		enableActions: function()
 		{
-			var email_disabled = $("tr.selected a[href^='mailto:']").length == 0;
-			$("#email").attr('disabled', email_disabled);
+			var email_disabled = $("td input:checkbox:checked").parents("tr").find("td a[href^='mailto:']").length == 0;
+			$("#email").prop('disabled', email_disabled);
 		}
 	});
 
-	$("#email").click(function(evvent)
+	$("#email").click(function(event)
 	{
 		var recipients = $.map($("tr.selected a[href^='mailto:']"), function(element)
 		{
@@ -25,9 +25,7 @@ $(document).ready(function()
 		});
 		location.href = "mailto:" + recipients.join(",");
 	});
-
 });
-
 </script>
 
 <div id="title_bar" class="btn-toolbar">
@@ -35,16 +33,16 @@ $(document).ready(function()
 	if ($controller_name == 'customers')
 	{
 	?>
-		<button class='btn btn-info btn-sm pull-right modal-dlg modal-btn-submit' data-href='<?php echo site_url($controller_name."/excel_import"); ?>'
+		<button class='btn btn-info btn-sm pull-right modal-dlg' data-btn-submit='<?php echo $this->lang->line('common_submit') ?>' data-href='<?php echo site_url($controller_name."/excel_import"); ?>'
 				title='<?php echo $this->lang->line('customers_import_items_excel'); ?>'>
 			<span class="glyphicon glyphicon-import">&nbsp</span><?php echo $this->lang->line('common_import_excel'); ?>
 		</button>
 	<?php
 	}
 	?>
-	<button class='btn btn-info btn-sm pull-right modal-dlg modal-btn-submit' data-href='<?php echo site_url($controller_name."/view"); ?>'
-			title='<?php echo $this->lang->line($controller_name. '_new'); ?>'>
-		<span class="glyphicon glyphicon-user">&nbsp</span><?php echo $this->lang->line($controller_name. '_new'); ?>
+	<button class='btn btn-info btn-sm pull-right modal-dlg' data-btn-submit='<?php echo $this->lang->line('common_submit') ?>' data-href='<?php echo site_url($controller_name."/view"); ?>'
+			title='<?php echo $this->lang->line($controller_name . '_new'); ?>'>
+		<span class="glyphicon glyphicon-user">&nbsp</span><?php echo $this->lang->line($controller_name . '_new'); ?>
 	</button>
 </div>
 

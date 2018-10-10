@@ -1,55 +1,41 @@
-<?php
-require_once("Report.php");
-class Summary_discounts extends Report
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+require_once("Summary_report.php");
+
+class Summary_discounts extends Summary_report
 {
-	function __construct()
+	protected function _get_data_columns()
 	{
-		parent::__construct();
+		return array(
+			array('discount' => $this->lang->line('reports_discount'), 'sorter' => 'number_sorter'),
+			array('count' => $this->lang->line('reports_count')),
+			array('total' => $this->lang->line('reports_total')));
 	}
-	
-	public function getDataColumns()
-	{
-		return array($this->lang->line('reports_discount_percent'), $this->lang->line('reports_count'));
-	}
-	
+
 	public function getData(array $inputs)
 	{
-		$this->db->select('CONCAT(discount_percent, "%") AS discount_percent, count(*) AS count');
-		$this->db->from('sales_items_temp');
-		$this->db->where("sale_date BETWEEN " . $this->db->escape($inputs['start_date']) . " AND " . $this->db->escape($inputs['end_date']));
-		$this->db->where('discount_percent > 0');
-
-		if ($inputs['sale_type'] == 'sales')
-        {
-            $this->db->where('quantity_purchased > 0');
-        }
-        elseif ($inputs['sale_type'] == 'returns')
-        {
-            $this->db->where('quantity_purchased < 0');
-        }
+		if($inputs['discount_type'] == FIXED)
+		{
+			$this->db->select('SUM(sales_items.discount) AS total, MAX(CONCAT("'.$this->config->item('currency_symbol').'",sales_items.discount)) AS discount, count(*) AS count');
+			$this->db->where('discount_type',FIXED);
+		}
+		elseif($inputs['discount_type'] == PERCENT)
+		{
+			$this->db->select('SUM(item_unit_price) * sales_items.discount / 100.0 AS total, MAX(CONCAT(sales_items.discount, "%")) AS discount, count(*) AS count');
+			$this->db->where('discount_type',PERCENT);
+		}	
 		
-		$this->db->group_by('sales_items_temp.discount_percent');
-		$this->db->order_by('discount_percent');
+		$this->db->where('discount > 0');
+		$this->db->group_by('sales_items.discount');
+		$this->db->order_by('sales_items.discount');
+		
 
-		return $this->db->get()->result_array();		
-	}
-	
-	public function getSummaryData(array $inputs)
-	{
-		$this->db->select('SUM(subtotal) AS subtotal, SUM(total) AS total, SUM(tax) AS tax, SUM(cost) AS cost, SUM(profit) AS profit');
-		$this->db->from('sales_items_temp');
-		$this->db->where("sale_date BETWEEN " . $this->db->escape($inputs['start_date']) . " AND " . $this->db->escape($inputs['end_date']));
+		$this->db->from('sales_items AS sales_items');
+		$this->db->join('sales AS sales', 'sales_items.sale_id = sales.sale_id', 'inner');
 
-		if ($inputs['sale_type'] == 'sales')
-        {
-            $this->db->where('quantity_purchased > 0');
-        }
-        elseif ($inputs['sale_type'] == 'returns')
-        {
-            $this->db->where('quantity_purchased < 0');
-        }
+		$this->_where($inputs);
 
-		return $this->db->get()->row_array();		
+		return $this->db->get()->result_array();
 	}
 }
 ?>

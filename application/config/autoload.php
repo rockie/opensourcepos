@@ -58,7 +58,7 @@ $autoload['packages'] = array();
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('database', 'form_validation', 'session', 'user_agent', 'pagination', 'sms');
+$autoload['libraries'] = array('database', 'form_validation', 'session', 'user_agent', 'pagination', 'encryption');
 
 /*
 | -------------------------------------------------------------------
@@ -72,6 +72,12 @@ $autoload['libraries'] = array('database', 'form_validation', 'session', 'user_a
 | Prototype:
 |
 |	$autoload['drivers'] = array('cache');
+|
+| You can also supply an alternative property name to be assigned in
+| the controller:
+|
+|	$autoload['drivers'] = array('cache' => 'cch');
+|
 */
 $autoload['drivers'] = array();
 
@@ -83,7 +89,7 @@ $autoload['drivers'] = array();
 |
 |	$autoload['helper'] = array('url', 'file');
 */
-$autoload['helper'] = array('form', 'url', 'table', 'text', 'locale', 'html', 'download', 'directory');
+$autoload['helper'] = array('form', 'url', 'tabular', 'text', 'locale', 'html', 'download', 'directory', 'migration');
 
 /*
 | -------------------------------------------------------------------
@@ -126,4 +132,4 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array('Appconfig', 'Person', 'Customer', 'Employee', 'Module', 'Item', 'Item_taxes', 'Sale', 'Sale_suspended', 'Supplier', 'Inventory', 'Receiving', 'Giftcard', 'Item_kit', 'Item_kit_items', 'Stock_location', 'Item_quantity');
+$autoload['model'] = array('Appconfig', 'Person', 'Customer', 'Employee', 'Module', 'Item', 'Item_taxes', 'Sale', 'Supplier', 'Inventory', 'Receiving', 'Giftcard', 'Item_kit', 'Item_kit_items', 'Stock_location', 'Item_quantity', 'Dinner_table', 'Customer_rewards', 'Rewards', 'Tax', 'Expense_category', 'Expense', 'Cashup');

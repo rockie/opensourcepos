@@ -1,4 +1,4 @@
-<?php echo form_open('config/save_locations/', array('id'=>'location_config_form', 'class'=>'form-horizontal')); ?>
+<?php echo form_open('config/save_locations/', array('id' => 'location_config_form', 'class' => 'form-horizontal')); ?>
     <div id="config_wrapper">
         <fieldset id="config_info">
             <div id="required_fields_message"><?php echo $this->lang->line('common_fields_required_message'); ?></div>
@@ -9,15 +9,15 @@
 			</div>
             
             <?php echo form_submit(array(
-                'name'=>'submit',
-                'id'=>'submit',
-                'value'=>$this->lang->line('common_submit'),
-                'class'=>'btn btn-primary btn-sm pull-right')); ?>
+                'name' => 'submit_stock',
+                'id' => 'submit_stock',
+                'value' => $this->lang->line('common_submit'),
+                'class' => 'btn btn-primary btn-sm pull-right')); ?>
         </fieldset>
     </div>
 <?php echo form_close(); ?>
 
-<script type='text/javascript'>
+<script type="text/javascript">
 //validation and submit handling
 $(document).ready(function()
 {
@@ -76,7 +76,7 @@ $(document).ready(function()
 			$(form).ajaxSubmit({
 				success: function(response)	{
 					$.notify({ message: response.message }, { type: response.success ? 'success' : 'danger'});
-					$("#stock_locations").load('<?php echo site_url("config/stock_locations"); ?>', init_add_remove_locations);
+					$("#stock_locations").load('<?php echo site_url("config/ajax_stock_locations"); ?>', init_add_remove_locations);
 				},
 				dataType: 'json'
 			});

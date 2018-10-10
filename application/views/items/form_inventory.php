@@ -93,48 +93,47 @@
 	</fieldset>
 <?php echo form_close(); ?>
 
-<script type='text/javascript'>
+<script type="text/javascript">
 //validation and submit handling
 $(document).ready(function()
 {		
-	$('#item_form').validate({
-		submitHandler:function(form)
-		{
+	$('#item_form').validate($.extend({
+		submitHandler: function(form) {
 			$(form).ajaxSubmit({
-			success:function(response)
-			{
-				dialog_support.hide();
-				table_support.handle_submit('<?php echo site_url('items'); ?>', response);
-			},
-			dataType:'json'
-		});
-
+				success: function(response)
+				{
+					dialog_support.hide();
+					table_support.handle_submit("<?php echo site_url($controller_name); ?>", response);
+				},
+				dataType: 'json'
+			});
 		},
-		errorLabelContainer: "#error_message_box",
- 		wrapper: "li",
+
+		errorLabelContainer: '#error_message_box',
+
 		rules: 
 		{
 			newquantity:
 			{
-				required:true,
-				number:true
+				required: true,
+				number: true
 			}
    		},
+
 		messages: 
 		{
-			
 			newquantity:
 			{
-				required:"<?php echo $this->lang->line('items_quantity_required'); ?>",
-				number:"<?php echo $this->lang->line('items_quantity_number'); ?>"
+				required: "<?php echo $this->lang->line('items_quantity_required'); ?>",
+				number: "<?php echo $this->lang->line('items_quantity_number'); ?>"
 			}
 		}
-	});
+	}, form_support.error));
 });
 
 function fill_quantity(val) 
 {   
-    var item_quantities = <?php echo json_encode($item_quantities); ?>;
-    document.getElementById("quantity").value = parseFloat(item_quantities[val]).toFixed(<?php echo quantity_decimals(); ?>);
+	var item_quantities = <?php echo json_encode($item_quantities); ?>;
+	document.getElementById('quantity').value = parseFloat(item_quantities[val]).toFixed(<?php echo quantity_decimals(); ?>);
 }
 </script>

@@ -1,34 +1,37 @@
-sudo: true                  # Required to install packages
-
-services: - docker
-
-env:
-    global:
-        - DOCKER_VERSION=1.7.1  # Install Docker version 1.7.1
-        - DOCKER_COMPOSE_VERSION=1.7.1
-        - DOCKER_VERSION=get.docker.com  # Install Docker using get.docker.com (may break)
-
-        - BRANCH=stable         # Use 'stable' branch
-        - BRANCH=develop        # Use 'develop' branch
-
-        - QUIET=1               # Less verbose logging
-        - UML_FIG=0             # Don't install fig
-        - UML_DOCKERCOMPOSE=1   # Install docker-compose
-
-    install:
-        # Install https://github.com/moul/travis-docker toolchain
-        #   - curl -sLo - http://j.mp/install-travis-docker | sh -xe
+sudo: required
+dist: trusty
+group: deprecated-2017Q4
+branches:
+  except:
+    - weblate
+services:
+  - docker
 before_install:
-    - sudo rm /usr/local/bin/docker-compose
-    - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
-    - chmod +x docker-compose
-    - sudo mv docker-compose /usr/local/bin
-    - docker-compose build
-    - docker-compose up -d
-
+  - curl -L https://github.com/docker/compose/releases/download/1.7.1/docker-compose-`uname
+    -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - date=`date +%Y%m%d%H%M%S` && branch=${TRAVIS_BRANCH} && rev=`git rev-parse --short=6
+    HEAD` && sed -i "s/\$1/\$1.$date.$branch.$rev/g" deployment.json
 script:
-    - docker-wait opensourcepos_php_1
-
-after_success:
-    - docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
-    - docker push jekkos/opensourcepos
+  - docker run --rm -v $(pwd):/app composer/composer install
+  - docker run --rm -v $(pwd):/app -w /app lucor/php7-cli php bin/install.php translations
+    develop
+  - docker run --rm -it -v $(pwd):/app -w /app digitallyseamless/nodejs-bower-grunt
+    sh -c "npm install && bower install && grunt package"
+  - docker-compose build
+env:
+  - TAG=$(echo ${TRAVIS_BRANCH} | sed s/feature\\///)
+after_success: '[ -n ${DOCKER_USERNAME} ] && docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+  && docker tag opensourcepos_php "jekkos/opensourcepos:$TAG" && docker push "jekkos/opensourcepos:$TAG"'
+deploy:
+  edge:
+    source: travis-ci/dpl
+    branch: master
+  file: deployment.json
+  provider: bintray
+  skip_cleanup: true
+  key: ${BINTRAY_API_KEY}
+  user: jekkos
+  on:
+    all_branches: true

@@ -1,5 +1,10 @@
 <?php $this->load->view("partial/header"); ?>
 
+<script type="text/javascript">
+	dialog_support.init("a.modal-dlg");
+</script>
+
+
 <div id="page_title"><?php echo $this->lang->line('reports_report_input'); ?></div>
 
 <?php
@@ -37,7 +42,7 @@ if(isset($error))
 
 <?php $this->load->view("partial/footer"); ?>
 
-<script type="text/javascript" language="javascript">
+<script type="text/javascript">
 $(document).ready(function()
 {
 	$("#generate_report").click(function()

@@ -1,43 +1,36 @@
-<?php
-require_once("Report.php");
-class Summary_payments extends Report
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+require_once("Summary_report.php");
+
+class Summary_payments extends Summary_report
 {
-	function __construct()
+	protected function _get_data_columns()
 	{
-		parent::__construct();
+		return array(
+			array('payment_type' => $this->lang->line('reports_payment_type')),
+			array('report_count' => $this->lang->line('reports_count')),
+			array('amount_due' => $this->lang->line('sales_amount_due'), 'sorter' => 'number_sorter'));
 	}
-	
-	public function getDataColumns()
-	{
-		return array($this->lang->line('reports_payment_type'), $this->lang->line('reports_count'), $this->lang->line('reports_total'));
-	}
-	
+
 	public function getData(array $inputs)
 	{
-		$this->db->select('sales_payments.payment_type, count(*) AS count, SUM(payment_amount) AS payment_amount');
-		$this->db->from('sales_payments');
-		$this->db->join('sales', 'sales.sale_id=sales_payments.sale_id');
-		$this->db->where("date(sale_time) BETWEEN " . $this->db->escape($inputs['start_date']) . " AND " . $this->db->escape($inputs['end_date']));
+		$this->db->select('sales_payments.payment_type, COUNT(DISTINCT sales_payments.sale_id) AS count, SUM(CASE WHEN sales_items.discount_type = ' . PERCENT . ' THEN sales_items.item_unit_price * sales_items.quantity_purchased * (1 - sales_items.discount / 100) ELSE sales_items.item_unit_price * sales_items.quantity_purchased - sales_items.discount END) AS payment_amount');
+		$this->db->from('sales_payments AS sales_payments');
+		$this->db->join('sales AS sales', 'sales.sale_id = sales_payments.sale_id');
+		$this->db->join('sales_items AS sales_items', 'sales_items.sale_id = sales_payments.sale_id', 'left');
 
-		if ($inputs['sale_type'] == 'sales')
-        {
-			$this->db->where('payment_amount > 0');
-        }
-        elseif ($inputs['sale_type'] == 'returns')
-        {
-			$this->db->where('payment_amount < 0');
-       	}
+		$this->_where($inputs);
 
 		$this->db->group_by("payment_type");
-		
+
 		$payments = $this->db->get()->result_array();
-		
+
 		// consider Gift Card as only one type of payment and do not show "Gift Card: 1, Gift Card: 2, etc." in the total
 		$gift_card_count = 0;
 		$gift_card_amount = 0;
-		foreach($payments as $key=>$payment)
-		{		
-			if( strstr($payment['payment_type'], $this->lang->line('sales_giftcard')) != FALSE )
+		foreach($payments as $key => $payment)
+		{
+			if(strstr($payment['payment_type'], $this->lang->line('sales_giftcard')) !== FALSE)
 			{
 				$gift_card_count  += $payment['count'];
 				$gift_card_amount += $payment['payment_amount'];
@@ -47,31 +40,12 @@ class Summary_payments extends Report
 			}
 		}
 
-		if( $gift_card_count > 0 )
+		if($gift_card_count > 0)
 		{
 			$payments[] = array('payment_type' => $this->lang->line('sales_giftcard'), 'count' => $gift_card_count, 'payment_amount' => $gift_card_amount);
 		}
-		
+
 		return $payments;
-	}
-	
-	public function getSummaryData(array $inputs)
-	{
-		$this->db->select('SUM(subtotal) AS subtotal, SUM(total) AS total, SUM(tax) AS tax, SUM(cost) AS cost, SUM(profit) AS profit');
-		$this->db->from('sales_items_temp');
-		$this->db->join('items', 'sales_items_temp.item_id = items.item_id');
-		$this->db->where("sale_date BETWEEN " . $this->db->escape($inputs['start_date']) . " AND " . $this->db->escape($inputs['end_date']));
-
-		if ($inputs['sale_type'] == 'sales')
-        {
-            $this->db->where('quantity_purchased > 0');
-        }
-        elseif ($inputs['sale_type'] == 'returns')
-        {
-            $this->db->where('quantity_purchased < 0');
-        }
-
-		return $this->db->get()->row_array();
 	}
 }
 ?>

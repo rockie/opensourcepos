@@ -1,4 +1,9 @@
-<?php
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * Item_quantity class
+ */
+
 class Item_quantity extends CI_Model
 {
     public function exists($item_id, $location_id)
@@ -9,7 +14,7 @@ class Item_quantity extends CI_Model
 
         return ($this->db->get()->num_rows() == 1);
     }
-    
+
     public function save($location_detail, $item_id, $location_id)
     {
         if(!$this->exists($item_id, $location_id))
@@ -22,9 +27,9 @@ class Item_quantity extends CI_Model
 
         return $this->db->update('item_quantities', $location_detail);
     }
-    
+
     public function get_item_quantity($item_id, $location_id)
-    {     
+    {
         $this->db->from('item_quantities');
         $this->db->where('item_id', $item_id);
         $this->db->where('location_id', $location_id);
@@ -42,10 +47,10 @@ class Item_quantity extends CI_Model
 
             $result->quantity = 0;
         }
-		
-        return $result;   
+
+        return $result;
     }
-	
+
 	/*
 	 * changes to quantity of an item according to the given amount.
 	 * if $quantity_change is negative, it will be subtracted,
@@ -59,7 +64,7 @@ class Item_quantity extends CI_Model
 
 		return $this->save($location_detail, $item_id, $location_id);
 	}
-	
+
 	/*
 	* Set to 0 all quantity in the given item
 	*/
@@ -69,7 +74,7 @@ class Item_quantity extends CI_Model
 
         return $this->db->update('item_quantities', array('quantity' => 0));
 	}
-	
+
 	/*
 	* Set to 0 all quantity in the given list of items
 	*/

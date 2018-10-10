@@ -1,10 +1,15 @@
 version: '2'
 
 volumes:
-    ospos:
+    uploads:
         driver: local
-  
+
 services:
+    sqlscript:
+        build:
+            context: database/
+            dockerfile: Dockerfile
+
     php:
         build:
             context: .
@@ -14,16 +19,17 @@ services:
         ports:
             - "80:80"
         volumes:
-            - ospos:/var/www/html
-            - ospos:/app
+            - uploads:/app/public/uploads
         environment:
+            - FORCE_HTTPS=false
+            - PHP_TIMEZONE=UTC
             - MYSQL_USERNAME=admin
             - MYSQL_PASSWORD=pointofsale
             - MYSQL_DB_NAME=ospos
             - MYSQL_HOST_NAME=mysql
 
     mysql:
-        image: mysql:5.7
+        image: mariadb:10.3.9
         environment:
             - MYSQL_ROOT_PASSWORD=pointofsale
             - MYSQL_DATABASE=ospos
@@ -31,5 +37,17 @@ services:
             - MYSQL_PASSWORD=pointofsale
         ports:
             - "3306:3306"
-        volumes:
-            - ./database/database.sql:/docker-entrypoint-initdb.d/database.sql
+        volumes_from:
+            - sqlscript
+
+#    phpmyadmin:
+#        image: phpmyadmin/phpmyadmin
+#        restart: always
+#        ports:
+#           - "8000:80"
+#        links:
+#            - mysql:mysql
+#        environment:
+#            - MYSQL_USERNAME=admin
+#            - MYSQL_ROOT_PASSWORD=pointofsale
+#            - PMA_HOST=mysql

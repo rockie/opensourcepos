@@ -1,4 +1,9 @@
-<?php
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ * Employee class
+ */
+
 class Employee extends Person
 {
 	/*
@@ -6,12 +11,12 @@ class Employee extends Person
 	*/
 	public function exists($person_id)
 	{
-		$this->db->from('employees');	
+		$this->db->from('employees');
 		$this->db->join('people', 'people.person_id = employees.person_id');
 		$this->db->where('employees.person_id', $person_id);
 
 		return ($this->db->get()->num_rows() == 1);
-	}	
+	}
 
 	/*
 	Gets total of rows
@@ -30,21 +35,21 @@ class Employee extends Person
 	public function get_all($limit = 10000, $offset = 0)
 	{
 		$this->db->from('employees');
-		$this->db->where('deleted', 0);		
-		$this->db->join('people', 'employees.person_id = people.person_id');			
+		$this->db->where('deleted', 0);
+		$this->db->join('people', 'employees.person_id = people.person_id');
 		$this->db->order_by('last_name', 'asc');
 		$this->db->limit($limit);
 		$this->db->offset($offset);
 
-		return $this->db->get();		
+		return $this->db->get();
 	}
-	
+
 	/*
 	Gets information about a particular employee
 	*/
 	public function get_info($employee_id)
 	{
-		$this->db->from('employees');	
+		$this->db->from('employees');
 		$this->db->join('people', 'people.person_id = employees.person_id');
 		$this->db->where('employees.person_id', $employee_id);
 		$query = $this->db->get();
@@ -75,11 +80,11 @@ class Employee extends Person
 	public function get_multiple_info($employee_ids)
 	{
 		$this->db->from('employees');
-		$this->db->join('people', 'people.person_id = employees.person_id');		
+		$this->db->join('people', 'people.person_id = employees.person_id');
 		$this->db->where_in('employees.person_id', $employee_ids);
 		$this->db->order_by('last_name', 'asc');
 
-		return $this->db->get();		
+		return $this->db->get();
 	}
 
 	/*
@@ -105,18 +110,18 @@ class Employee extends Person
 				$success = $this->db->update('employees', $employee_data);
 			}
 
-			//We have either inserted or updated a new employee, now lets set permissions. 
+			//We have either inserted or updated a new employee, now lets set permissions.
 			if($success)
 			{
 				//First lets clear out any grants the employee currently has.
 				$success = $this->db->delete('grants', array('person_id' => $employee_id));
-				
+
 				//Now insert the new grants
 				if($success)
 				{
-					foreach($grants_data as $permission_id)
+					foreach($grants_data as $grant)
 					{
-						$success = $this->db->insert('grants', array('permission_id' => $permission_id, 'person_id' => $employee_id));
+						$success = $this->db->insert('grants', array('permission_id' => $grant['permission_id'], 'person_id' => $employee_id, 'menu_group' => $grant['menu_group']));
 					}
 				}
 			}
@@ -147,7 +152,7 @@ class Employee extends Person
 
 		//Delete permissions
 		if($this->db->delete('grants', array('person_id' => $employee_id)))
-		{	
+		{
 			$this->db->where('person_id', $employee_id);
 			$success = $this->db->update('employees', array('deleted' => 1));
 		}
@@ -198,7 +203,7 @@ class Employee extends Person
 		$this->db->join('people', 'employees.person_id = people.person_id');
 		$this->db->group_start();
 			$this->db->like('first_name', $search);
-			$this->db->or_like('last_name', $search); 
+			$this->db->or_like('last_name', $search);
 			$this->db->or_like('CONCAT(first_name, " ", last_name)', $search);
 		$this->db->group_end();
 		$this->db->where('deleted', 0);
@@ -239,7 +244,7 @@ class Employee extends Person
 		}
 
 		//only return $limit suggestions
-		if(count($suggestions > $limit))
+		if(count($suggestions) > $limit)
 		{
 			$suggestions = array_slice($suggestions, 0, $limit);
 		}
@@ -252,27 +257,21 @@ class Employee extends Person
 	*/
 	public function get_found_rows($search)
 	{
-		$this->db->from('employees');
-		$this->db->join('people', 'employees.person_id = people.person_id');
-		$this->db->group_start();
-			$this->db->like('first_name', $search);
-			$this->db->or_like('last_name', $search);
-			$this->db->or_like('email', $search);
-			$this->db->or_like('phone_number', $search);
-			$this->db->or_like('username', $search);
-			$this->db->or_like('CONCAT(first_name, " ", last_name)', $search);
-		$this->db->group_end();
-		$this->db->where('deleted', 0);
-
-		return $this->db->get()->num_rows();
+		return $this->search($search, 0, 0, 'last_name', 'asc', TRUE);
 	}
 
 	/*
 	Performs a search on employees
 	*/
-	public function search($search, $rows = 0, $limit_from = 0, $sort = 'last_name', $order = 'asc')
+	public function search($search, $rows = 0, $limit_from = 0, $sort = 'last_name', $order = 'asc', $count_only = FALSE)
 	{
-		$this->db->from('employees');
+		// get_found_rows case
+		if($count_only == TRUE)
+		{
+			$this->db->select('COUNT(employees.person_id) as count');
+		}
+
+		$this->db->from('employees AS employees');
 		$this->db->join('people', 'employees.person_id = people.person_id');
 		$this->db->group_start();
 			$this->db->like('first_name', $search);
@@ -283,6 +282,13 @@ class Employee extends Person
 			$this->db->or_like('CONCAT(first_name, " ", last_name)', $search);
 		$this->db->group_end();
 		$this->db->where('deleted', 0);
+
+		// get_found_rows case
+		if($count_only == TRUE)
+		{
+			return $this->db->get()->row()->count;
+		}
+
 		$this->db->order_by($sort, $order);
 
 		if($rows > 0)
@@ -290,7 +296,7 @@ class Employee extends Person
 			$this->db->limit($rows, $limit_from);
 		}
 
-		return $this->db->get();	
+		return $this->db->get();
 	}
 
 	/*
@@ -298,14 +304,28 @@ class Employee extends Person
 	*/
 	public function login($username, $password)
 	{
-		$query = $this->db->get_where('employees', array('username' => $username, 'password' => md5($password), 'deleted' => 0), 1);
+		$query = $this->db->get_where('employees', array('username' => $username, 'deleted' => 0), 1);
 
 		if($query->num_rows() == 1)
 		{
 			$row = $query->row();
-			$this->session->set_userdata('person_id', $row->person_id);
 
-			return TRUE;
+			// compare passwords depending on the hash version
+			if($row->hash_version == 1 && $row->password == md5($password))
+			{
+				$this->db->where('person_id', $row->person_id);
+				$this->session->set_userdata('person_id', $row->person_id);
+				$password_hash = password_hash($password, PASSWORD_DEFAULT);
+
+				return $this->db->update('employees', array('hash_version' => 2, 'password' => $password_hash));
+			}
+			elseif($row->hash_version == 2 && password_verify($password, $row->password))
+			{
+				$this->session->set_userdata('person_id', $row->person_id);
+
+				return TRUE;
+			}
+
 		}
 
 		return FALSE;
@@ -317,9 +337,10 @@ class Employee extends Person
 	public function logout()
 	{
 		$this->session->sess_destroy();
+
 		redirect('login');
 	}
-	
+
 	/*
 	Determins if a employee is logged in
 	*/
@@ -343,7 +364,7 @@ class Employee extends Person
 
 	/*
 	Determines whether the employee has access to at least one submodule
-	 */
+	*/
 	public function has_module_grant($permission_id, $person_id)
 	{
 		$this->db->from('grants');
@@ -370,23 +391,46 @@ class Employee extends Person
 		return ($this->db->get()->num_rows() == 0);
 	}
 
-	/*
-	Determines whether the employee specified employee has access the specific module.
-	*/
+	/**
+	 * Determines whether the employee specified employee has access the specific module.
+	 */
 	public function has_grant($permission_id, $person_id)
 	{
 		//if no module_id is null, allow access
-		if($permission_id == null)
+		if($permission_id == NULL)
 		{
 			return TRUE;
 		}
 
 		$query = $this->db->get_where('grants', array('person_id' => $person_id, 'permission_id' => $permission_id), 1);
 
-		return ($query->num_rows() == 1); 
+		return ($query->num_rows() == 1);
 	}
 
- 	/*
+	/**
+	 * Returns the menu group designation that this module is to appear in
+	 */
+	public function get_menu_group($permission_id, $person_id)
+	{
+		$this->db->select('menu_group');
+		$this->db->from('grants');
+		$this->db->where('permission_id', $permission_id);
+		$this->db->where('person_id', $person_id);
+
+		$row = $this->db->get()->row();
+
+		// If no grants are assigned yet then set the default to 'home'
+		if($row == NULL)
+		{
+			return 'home';
+		}
+		else
+		{
+			return $row->menu_group;
+		}
+	}
+
+	/*
 	Gets employee permission grants
 	*/
 	public function get_employee_grants($person_id)
@@ -395,6 +439,51 @@ class Employee extends Person
 		$this->db->where('person_id', $person_id);
 
 		return $this->db->get()->result_array();
+	}
+
+	/*
+	Attempts to login employee and set session. Returns boolean based on outcome.
+	*/
+	public function check_password($username, $password)
+	{
+		$query = $this->db->get_where('employees', array('username' => $username, 'deleted' => 0), 1);
+
+		if($query->num_rows() == 1)
+		{
+			$row = $query->row();
+
+			// compare passwords
+			if(password_verify($password, $row->password))
+			{
+				return TRUE;
+			}
+
+		}
+
+		return FALSE;
+	}
+
+	/*
+	Change password for the employee
+	*/
+	public function change_password($employee_data, $employee_id = FALSE)
+	{
+		$success = FALSE;
+
+		if(ENVIRONMENT != 'testing')
+		{
+			//Run these queries as a transaction, we want to make sure we do all or nothing
+			$this->db->trans_start();
+
+			$this->db->where('person_id', $employee_id);
+			$success = $this->db->update('employees', $employee_data);
+
+			$this->db->trans_complete();
+
+			$success &= $this->db->trans_status();
+		}
+
+		return $success;
 	}
 }
 ?>

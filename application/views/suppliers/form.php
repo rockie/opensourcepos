@@ -2,7 +2,7 @@
 
 <ul id="error_message_box" class="error_message_box"></ul>
 
-<?php echo form_open('suppliers/save/'.$person_info->person_id, array('id'=>'supplier_form', 'class'=>'form-horizontal')); ?>
+<?php echo form_open($controller_name . '/save/' . $person_info->person_id, array('id'=>'supplier_form', 'class'=>'form-horizontal')); ?>
 	<fieldset id="supplier_basic_info">
 		<div class="form-group form-group-sm">
 			<?php echo form_label($this->lang->line('suppliers_company_name'), 'company_name', array('class'=>'required control-label col-xs-3')); ?>
@@ -13,6 +13,13 @@
 					'class'=>'form-control input-sm',
 					'value'=>$person_info->company_name)
 					);?>
+			</div>
+		</div>
+
+		<div class="form-group form-group-sm">
+			<?php echo form_label($this->lang->line('suppliers_category'), 'category', array('class'=>'required control-label col-xs-3')); ?>
+			<div class='col-xs-6'>
+				<?php echo form_dropdown('category', $categories, $person_info->category, array('class'=>'form-control', 'id'=>'category'));?>
 			</div>
 		</div>
 
@@ -44,30 +51,32 @@
 	</fieldset>
 <?php echo form_close(); ?>
 
-<script type='text/javascript'>
+<script type="text/javascript">
 //validation and submit handling
 $(document).ready(function()
 {
 	$('#supplier_form').validate($.extend({
-		submitHandler:function(form)
-		{
+		submitHandler: function(form) {
 			$(form).ajaxSubmit({
-			success:function(response)
-			{
-				dialog_support.hide();
-				table_support.handle_submit('<?php echo site_url('suppliers'); ?>', response);
-			},
-			dataType:'json'
-		});
-
+				success: function(response)
+				{
+					dialog_support.hide();
+					table_support.handle_submit("<?php echo site_url($controller_name); ?>", response);
+				},
+				dataType: 'json'
+			});
 		},
+
+		errorLabelContainer: '#error_message_box',
+ 
 		rules:
 		{
-			company_name: "required",
-			first_name: "required",
-			last_name: "required",
-			email: "email"
+			company_name: 'required',
+			first_name: 'required',
+			last_name: 'required',
+			email: 'email'
    		},
+
 		messages: 
 		{
 			company_name: "<?php echo $this->lang->line('suppliers_company_name_required'); ?>",
@@ -77,5 +86,4 @@ $(document).ready(function()
 		}
 	}, form_support.error));
 });
-
 </script>

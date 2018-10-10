@@ -1,8 +1,16 @@
 <table id="suspended_sales_table" class="table table-striped table-hover">
 	<thead>
 		<tr bgcolor="#CCC">
-			<th><?php echo $this->lang->line('sales_suspended_sale_id'); ?></th>
+			<th><?php echo $this->lang->line('sales_suspended_doc_id'); ?></th>
 			<th><?php echo $this->lang->line('sales_date'); ?></th>
+			<?php
+			if($this->config->item('dinner_table_enable') == TRUE)
+			{
+			?>
+				<th><?php echo $this->lang->line('sales_table'); ?></th>
+			<?php
+			}
+			?>
 			<th><?php echo $this->lang->line('sales_customer'); ?></th>
 			<th><?php echo $this->lang->line('sales_comments'); ?></th>
 			<th><?php echo $this->lang->line('sales_unsuspend_and_delete'); ?></th>
@@ -14,8 +22,16 @@
 		{
 		?>
 			<tr>
-				<td><?php echo $suspended_sale['sale_id'];?></td>
+				<td><?php echo $suspended_sale['doc_id'];?></td>
 				<td><?php echo date($this->config->item('dateformat'), strtotime($suspended_sale['sale_time']));?></td>
+				<?php
+				if($this->config->item('dinner_table_enable') == TRUE)
+				{
+				?>
+					<td><?php echo $this->Dinner_table->get_name($suspended_sale['dinner_table_id']);?></td>
+				<?php
+				}
+				?>
 				<td>
 					<?php
 					if (isset($suspended_sale['customer_id']))

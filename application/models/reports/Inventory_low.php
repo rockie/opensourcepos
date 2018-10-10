@@ -1,35 +1,37 @@
-<?php
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
 require_once("Report.php");
+
 class Inventory_low extends Report
 {
-	function __construct()
-	{
-		parent::__construct();
-	}
-	
 	public function getDataColumns()
 	{
-		return array($this->lang->line('reports_item_name'),
-					$this->lang->line('reports_item_number'), 
-					$this->lang->line('reports_description'), 
-					$this->lang->line('reports_quantity'), 
-					$this->lang->line('reports_reorder_level'), 
-					$this->lang->line('reports_stock_location'));
+		return array(
+			array('item_name' => $this->lang->line('reports_item_name')),
+			array('item_number' => $this->lang->line('reports_item_number')),
+			array('quantity' => $this->lang->line('reports_quantity')),
+			array('reorder_level' => $this->lang->line('reports_reorder_level')),
+			array('location_name' => $this->lang->line('reports_stock_location')));
 	}
-	
-    public function getData(array $inputs)
-    {
-        $this->db->from('items');
-        $this->db->join('item_quantities', 'items.item_id=item_quantities.item_id');
-        $this->db->join('stock_locations', 'item_quantities.location_id=stock_locations.location_id');
-        $this->db->select('name, item_number, reorder_level, item_quantities.quantity, description, location_name');
-        $this->db->where('item_quantities.quantity <= reorder_level');
-        $this->db->where('items.deleted', 0);
-        $this->db->order_by('name');
- 
-        return $this->db->get()->result_array();
-    }
-	
+
+	public function getData(array $inputs)
+	{
+		$query = $this->db->query("SELECT " . $this->Item->get_item_name('name') . ", 
+			items.item_number,
+			item_quantities.quantity, 
+			items.reorder_level, 
+			stock_locations.location_name
+			FROM " . $this->db->dbprefix('items') . " AS items
+			JOIN " . $this->db->dbprefix('item_quantities') . " AS item_quantities ON items.item_id = item_quantities.item_id
+			JOIN " . $this->db->dbprefix('stock_locations') . " AS stock_locations ON item_quantities.location_id = stock_locations.location_id
+			WHERE items.deleted = 0
+			AND items.stock_type = 0
+			AND item_quantities.quantity <= items.reorder_level
+			ORDER BY items.name");
+
+		return $query->result_array();
+	}
+
 	public function getSummaryData(array $inputs)
 	{
 		return array();
